@@ -1,4 +1,7 @@
-#dataset dir
+#data dir
+data/crop/
+data/video/
 
 #etc
 .idea
+*.csv

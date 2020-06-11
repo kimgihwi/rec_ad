@@ -1,12 +1,15 @@
 import cv2
-import numpy as np
 import dlib
+
 import os
 
+import numpy as np
+import pandas as pd
 
-def video_capture(path, color='color', mode='save'):
+
+def video_capture(file, color='color', mode='save'):
     """
-    :param path: video file path + video file name
+    :param file: video file name, type == str()
     :param color: color default value is 'color'. If you want to use gray image, then set mode to 'gray'.
     :param mode: mode default value is 'save'. If you want to get image coordinate, then set mode to 'save'.
     :return: If you set mode to 'coordinate', then you could get coordinates of cropped image.
@@ -14,7 +17,7 @@ def video_capture(path, color='color', mode='save'):
 
     face_cascade = cv2.CascadeClassifier('./detector/haarcascade_frontalface_alt.xml')
 
-    vid = cv2.VideoCapture(path)
+    vid = cv2.VideoCapture('./data/video/' + file)
     iterator = 0        # while iterator
     img_idx = 0     # cropped image index
 
@@ -37,8 +40,8 @@ def video_capture(path, color='color', mode='save'):
         faces = face_cascade.detectMultiScale(img, 1.3, 5)  # image scale
 
         # control capture interval
-        if iter % 4 != 0:
-            iter += 1
+        if iterator % 4 != 0:
+            iterator += 1
             continue
 
         for (x, y, w, h) in faces:
@@ -58,7 +61,7 @@ def video_capture(path, color='color', mode='save'):
         if mode == 'coordinate':
             return np.array([x_co_list, y_co_list, height_list, width_list])
 
-        print("image cropped success")
+        print("image " + str(img_idx) + " cropped success")
 
 
 def face_landmark(path, mode='normal'):
@@ -69,15 +72,14 @@ def face_landmark(path, mode='normal'):
     :return: 68 of face landmark coordinate list about every image in directory. / type == numpy.array
     """
 
-
-    img_path = os.getcwd() + '/data' + path   # type == str
-    img_file_list = os.listdir(os.getcwd())   # type == list
+    img_path = os.getcwd() + '/data/' + path   # type == str
+    img_file_list = os.listdir(img_path)   # type == list
     img_num = len(img_file_list)              # amount of images in directory
 
     landmark_list = []
 
-    for i in img_num:
-        tmp_img = cv2.imread(img_path + 'crop_img_' + str(i) + 'png')
+    for i in range(img_num):
+        tmp_img = cv2.imread(img_path + '/crop_img_' + str(i) + '.png')
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor('./detector/shape_predictor_68_face_landmarks.dat')
         faces = detector(tmp_img)
@@ -110,5 +112,53 @@ def face_landmark(path, mode='normal'):
     return np.array(landmark_list)
 
 
+def landmark_table(arr, coor, mode=''):
+    """
+    :param arr: landmarks numpy array
+    :param coor: x or y coordinate / type==str
+    :param mode: if you want to save it, then mode='save'
+    :return: landmark DataFrame (about x or y coordinate)
+    """
+
+    if coor == 'x':
+        coor = 0
+    elif coor == 'y':
+        coor = 1
+    else:
+        print('invalid value')
+
+    coor_list = []
+    for i in range(len(arr)):
+        coor_list.append(list(landmarks[i].T[coor]))
+
+    df_coor = pd.DataFrame(np.array(coor_list))
+
+    if mode == 'save':
+        df_coor.to_csv('test_coor_data.csv', mode='w')
+
+    return df_coor
+
+
+def landmark_table_diff(df, mode=''):
+    """
+    :param df: landmark pandas DataFrame
+    :param mode: if you want to save itm then mode='save'
+    :return: landmark's differential DataFrame
+    """
+
+    diff_df = df - df.iloc[0]
+
+    if mode == 'save':
+        diff_df.to_csv('test_diff_df.csv', mode='w')
+
+    return diff_df
+
+
 if __name__ == '__main__':
-    print("main")
+    print("excute main")
+    # video_capture('normal.avi', color='gray')
+    landmarks = face_landmark('crop')
+
+    tmp_table = landmark_table(landmarks, 'x')
+
+    landmark_table_diff(tmp_table, mode='save')
