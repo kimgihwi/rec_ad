@@ -1,6 +1,5 @@
 #data dir
-data/crop/
-data/video/
+data
 
 #etc
 .idea

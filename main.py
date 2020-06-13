@@ -46,7 +46,7 @@ def video_capture(file, color='color', mode='save'):
 
         for (x, y, w, h) in faces:
             cropped = img[y - int(h / 4):y + h + int(h / 4), x - int(w / 4):x + w + int(w / 4)]  # cropped image
-            cv2.imwrite('./data/crop/crop_img_' + str(img_idx) + '.png', cropped)    # save cropped image
+            cv2.imwrite('./data/crop3/crop_img_' + str(img_idx) + '.png', cropped)    # save cropped image
 
             # if you want to get face recognition coordinate for each image
             if mode == 'coordinate':
@@ -72,19 +72,37 @@ def face_landmark(path, mode='normal'):
     :return: 68 of face landmark coordinate list about every image in directory. / type == numpy.array
     """
 
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor('./detector/shape_predictor_68_face_landmarks.dat')
+
     img_path = os.getcwd() + '/data/' + path   # type == str
     img_file_list = os.listdir(img_path)   # type == list
     img_num = len(img_file_list)              # amount of images in directory
 
     landmark_list = []
 
-    for i in range(img_num):
-        tmp_img = cv2.imread(img_path + '/crop_img_' + str(i) + '.png')
-        detector = dlib.get_frontal_face_detector()
-        predictor = dlib.shape_predictor('./detector/shape_predictor_68_face_landmarks.dat')
+    idx = 0
+    err_num = 0
+
+    while True:
+        file = img_path + '/crop_img_' + str(idx) + '.png'
+
+        if os.path.isfile(file):
+            tmp_img = cv2.imread(file)
+        else:
+            tmp_img = cv2.imread(img_path + '/crop_img_' + str(idx-1) + '.png')
+            err_num += 1
+
+        # detector = dlib.get_frontal_face_detector()
+        # predictor = dlib.shape_predictor('./detector/shape_predictor_68_face_landmarks.dat')
         faces = detector(tmp_img)
 
         tmp_landmark_list = []
+
+        if faces == dlib.rectangles([]):
+            landmark_list.append(landmark_list[len(landmark_list)-1])
+            idx += 1
+            continue
 
         for face in faces:
             # face rectangular coordinate (not using)
@@ -107,7 +125,12 @@ def face_landmark(path, mode='normal'):
         landmark_list.append(tmp_landmark_list)
 
         if mode == 'save':
-            cv2.imwrite(os.getcwd() + 'data/face_landmark/landmark_' + str(i) + 'png', tmp_img)
+            cv2.imwrite(os.getcwd() + './data/face_landmark/landmark_' + str(idx) + '.png', tmp_img)
+
+        idx += 1
+
+        if idx == (img_num + err_num):
+            break
 
     return np.array(landmark_list)
 
@@ -128,13 +151,14 @@ def landmark_table(arr, coor, mode=''):
         print('invalid value')
 
     coor_list = []
+
     for i in range(len(arr)):
-        coor_list.append(list(landmarks[i].T[coor]))
+        coor_list.append(list(np.array(arr[i]).T[coor]))
 
     df_coor = pd.DataFrame(np.array(coor_list))
 
     if mode == 'save':
-        df_coor.to_csv('test_coor_data.csv', mode='w')
+        df_coor.to_csv('test_coor_data3.csv', mode='w')
 
     return df_coor
 
@@ -149,16 +173,16 @@ def landmark_table_diff(df, mode=''):
     diff_df = df - df.iloc[0]
 
     if mode == 'save':
-        diff_df.to_csv('test_diff_df.csv', mode='w')
+        diff_df.to_csv('test_diff_df3.csv', mode='w')
 
     return diff_df
 
 
 if __name__ == '__main__':
     print("excute main")
-    # video_capture('normal.avi', color='gray')
-    landmarks = face_landmark('crop')
+    video_capture('happy.avi', color='gray')
+    landmarks = face_landmark('crop3')
 
-    tmp_table = landmark_table(landmarks, 'x')
+    tmp_table = landmark_table(landmarks, 'x', mode='save')
 
     landmark_table_diff(tmp_table, mode='save')
