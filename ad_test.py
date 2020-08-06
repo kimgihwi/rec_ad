@@ -13,6 +13,9 @@ import os
 
 import time
 
+import json
+from collections import OrderedDict
+
 
 def video_open(video, path="./"):
     # os.popen("C:/kiwi/ui_basic/video1.mp4")
@@ -72,7 +75,7 @@ def video_close():
 def video_player(video, user):
     cam_cap = cv2.VideoCapture(0)
     # video_cap = cv2.VideoCapture(path+file)
-    path = "c:/kiwi/ui_basic/Data/AD/"
+    path = "c:/kiwi/GitHub/rec_ad/Data/AD/"
     video_open(video, path)
 
     idx = 0
@@ -80,7 +83,7 @@ def video_player(video, user):
         _, frame = cam_cap.read()
 
         time.sleep(0.5)
-        cv2.imwrite('c:/kiwi/ui_basic/Data/Item' + str(video) + '/User' + str(user)+ '/cap_' + str(idx) + '.png', frame)
+        cv2.imwrite('c:/kiwi/Github/rec_ad/Data/Item' + str(video) + '/User' + str(user)+ '/cap_' + str(idx) + '.png', frame)
         idx += 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -113,20 +116,48 @@ class App(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
+        # Application Window
         self.setWindowTitle("Kiwi Recommendation System")
-        self.setGeometry(300, 300, 800, 400)
+        # self.setGeometry(300, 300, 800, 400)
+        self.setWindowIcon((QtGui.QIcon('c:/kiwi/github/rec_ad/etc/kiwi.png')))
+        self.setFixedSize(700, 400)
+        self.center()
         # self.setStyleSheet("background-color: #808081; border: 1.5px solid #444444;")
+        self.statusBar().showMessage('Ready')
 
-        # btn1 = QtWidgets.QPushButton("Start for Videos", self)
-        # btn1.move(100, 100)
-        # # btn1.clicked.connect(lambda: video_player(file='video3.mp4', path='C:/kiwi/ui_basic/', ID='kiwi'))
-        # btn1.clicked.connect(lambda: video_player(file='video1.mp4', path='C:/kiwi/ui_basic/'))
-        # # btn1.clicked.connect(self.btn1_clicked)
-
-        # btn2 = QtWidgets.QPushButton(self)
-        # btn2.move(60, 60)
-        # btn2.setText('Input Text&2')
-        # btn2.clicked.connect(self.on_click)
+        # TODO(Kiwi) - insert picture into ui
+        # # Video Picture
+        # pic_path = 'C:/kiwi/GitHub/rec_ad/etc/'
+        # pic1 = QtGui.QPixmap(pic_path + 'AD1.png')
+        # pic2 = QtGui.QPixmap(pic_path + 'AD2.png')
+        # pic3 = QtGui.QPixmap(pic_path + 'AD3.png')
+        # pic4 = QtGui.QPixmap(pic_path + 'AD4.png')
+        # pic5 = QtGui.QPixmap(pic_path + 'AD5.png')
+        # pic6 = QtGui.QPixmap(pic_path + 'AD6.png')
+        # pic7 = QtGui.QPixmap(pic_path + 'AD7.png')
+        # pic8 = QtGui.QPixmap(pic_path + 'AD8.png')
+        # pic9 = QtGui.QPixmap(pic_path + 'AD9.png')
+        #
+        # pic1_label = QtWidgets.QLabel()
+        # pic2_label = QtWidgets.QLabel()
+        # pic3_label = QtWidgets.QLabel()
+        # pic4_label = QtWidgets.QLabel()
+        # pic5_label = QtWidgets.QLabel()
+        # pic6_label = QtWidgets.QLabel()
+        # pic7_label = QtWidgets.QLabel()
+        # pic8_label = QtWidgets.QLabel()
+        # pic9_label = QtWidgets.QLabel()
+        # # pic1_label.resize(30, 30)
+        #
+        # pic1_label.setPixmap(pic1)
+        # pic2_label.setPixmap(pic2)
+        # pic3_label.setPixmap(pic3)
+        # pic4_label.setPixmap(pic4)
+        # pic5_label.setPixmap(pic5)
+        # pic6_label.setPixmap(pic6)
+        # pic7_label.setPixmap(pic7)
+        # pic8_label.setPixmap(pic8)
+        # pic9_label.setPixmap(pic9)
 
         # User Information
         self.u_num = -1
@@ -135,7 +166,8 @@ class App(QtWidgets.QMainWindow):
         self.num_line = QtWidgets.QLineEdit(self)
         self.name_line = QtWidgets.QLineEdit(self)
         self.gender_line = QtWidgets.QLineEdit(self)
-        self.age_line = QtWidgets.QLineEdit(self)
+        # self.age_line = QtWidgets.QLineEdit(self)
+        self.age_line = QtWidgets.QSpinBox(self)
 
         self.num_line.setAlignment(QtCore.Qt.AlignCenter)
         self.name_line.setAlignment(QtCore.Qt.AlignCenter)
@@ -147,15 +179,15 @@ class App(QtWidgets.QMainWindow):
         self.gender_line.setFont(QtGui.QFont("나눔바른고딕", 10))
         self.age_line.setFont(QtGui.QFont("나눔바른고딕", 10))
         #
-        self.num_line.move(610, 60)
-        self.name_line.move(610, 100)
-        self.gender_line.move(610, 140)
-        self.age_line.move(610, 180)
+        self.num_line.move(500, 60)
+        self.name_line.move(500, 100)
+        self.gender_line.move(500, 140)
+        self.age_line.move(500, 180)
 
         self.num_label = QtWidgets.QLabel("No.", self)
         self.name_label = QtWidgets.QLabel("이름 : ", self)
-        self.gender_label = QtWidgets.QLabel("나이 : ", self)
-        self.age_label = QtWidgets.QLabel("성별 : ", self)
+        self.gender_label = QtWidgets.QLabel("성별 : ", self)
+        self.age_label = QtWidgets.QLabel("나이 : ", self)
 
         self.num_label.resize(45, 30)
         self.name_label.resize(45, 30)
@@ -169,10 +201,10 @@ class App(QtWidgets.QMainWindow):
         self.gender_label.setFont(QtGui.QFont("나눔스퀘어라운드 Bold", 10))
         self.age_label.setFont(QtGui.QFont("나눔스퀘어라운드 Bold", 10))
 
-        self.num_label.move(560, 60)
-        self.name_label.move(560, 100)
-        self.gender_label.move(560, 140)
-        self.age_label.move(560, 180)
+        self.num_label.move(450, 60)
+        self.name_label.move(450, 100)
+        self.gender_label.move(450, 140)
+        self.age_label.move(450, 180)
 
         # #
         # # form_lbx = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight, parent=self)
@@ -201,7 +233,7 @@ class App(QtWidgets.QMainWindow):
         # self.setLayout(gbox)
 
         self.save_btn = QtWidgets.QPushButton("Save", self)
-        self.save_btn.move(610, 220)
+        self.save_btn.move(500, 220)
         self.save_btn.clicked.connect(self.save_clicked)
 
         #
@@ -223,25 +255,25 @@ class App(QtWidgets.QMainWindow):
         # self.setLayout(vbox)
 
         # video start
-        self.btn1 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn2 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn3 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn4 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn5 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn6 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn7 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn8 = QtWidgets.QPushButton("Start for Videos", self)
-        self.btn9 = QtWidgets.QPushButton("Start for Videos", self)
+        self.btn1 = QtWidgets.QPushButton("Video1", self)
+        self.btn2 = QtWidgets.QPushButton("Video2", self)
+        self.btn3 = QtWidgets.QPushButton("Video3", self)
+        self.btn4 = QtWidgets.QPushButton("Video4", self)
+        self.btn5 = QtWidgets.QPushButton("Video5", self)
+        self.btn6 = QtWidgets.QPushButton("Video6", self)
+        self.btn7 = QtWidgets.QPushButton("Video7", self)
+        self.btn8 = QtWidgets.QPushButton("Video8", self)
+        self.btn9 = QtWidgets.QPushButton("Video9", self)
 
         self.btn1.move(20, 80)
         self.btn2.move(140, 80)
         self.btn3.move(260, 80)
-        self.btn4.move(20, 120)
-        self.btn5.move(140, 120)
-        self.btn6.move(260, 120)
-        self.btn7.move(20, 160)
-        self.btn8.move(140, 160)
-        self.btn9.move(260, 160)
+        self.btn4.move(20, 200)
+        self.btn5.move(140, 200)
+        self.btn6.move(260, 200)
+        self.btn7.move(20, 320)
+        self.btn8.move(140, 320)
+        self.btn9.move(260, 320)
 
         self.video_clicked(self.btn1, 1)
         self.video_clicked(self.btn2, 2)
@@ -253,17 +285,16 @@ class App(QtWidgets.QMainWindow):
         self.video_clicked(self.btn8, 8)
         self.video_clicked(self.btn9, 9)
 
-        # self.btn1.clicked.connect(lambda: self.change_video(int(1)))
-        # self.btn1.clicked.connect(lambda: video_player(num=self.i_num, user=self.u_num))
-
-        # btn1.clicked.connect(lambda: video_player(file='video3.mp4', path='C:/kiwi/ui_basic/', ID='kiwi'))
-        # btn1.clicked.connect(lambda: video_player(file='video1.mp4', path='C:/kiwi/ui_basic/'))
-        # btn1.clicked.connect(self.btn1_clicked)
-
         # exit button
         self.exit_btn = QtWidgets.QPushButton("exit", self)
-        self.exit_btn.move(650, 300)
+        self.exit_btn.move(550, 320)
         self.exit_btn.clicked.connect(lambda: QtCore.QCoreApplication.quit())
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def on_click(self):
         self.lbl.setText(self.qle.text())
@@ -281,35 +312,16 @@ class App(QtWidgets.QMainWindow):
         self.u_num = int(self.num_line.text())
         # self.i_num = self.
 
-    #
-    # def btn1_clicked(self):
-    #     QtWidgets.QMessageBox.about(self, "message", "clicked")
+        # saving user information to json
+        file_data = OrderedDict()
+        file_data["No."] = self.u_num
+        file_data["Name"] = self.name_line.text()
+        file_data["Gender"] = self.gender_line.text()
+        file_data["Age"] = self.age_line.text()
+        with open("./userInfo/User" + str(self.u_num) + ".json", "w", encoding="utf-8") as make_file:
+            json.dump(file_data, make_file, ensure_ascii=False, indent='\t')
 
-    # def video_player(self, file, path='./', ID='Test'):
-    #     cam_cap = cv2.VideoCapture(0)
-    #     video_cap = cv2.VideoCapture(path + file)
-    #     video_open(file, path)
-    #
-    #     idx = 0
-    #     while True:
-    #         _, frame = cam_cap.read()
-    #         ret1, _ = video_cap.read()
-    #
-    #         if ret1:
-    #             if idx % 10 == 0:
-    #                 cv2.imwrite('./Data/Item' + str(file[5]) + '/User1/u1_i1_' + str(int(idx / 10.0)) + '.png', frame)
-    #             idx += 1
-    #
-    #             if cv2.waitKey(1) & 0xFF == ord('q'):
-    #                 break
-    #
-    #         else:
-    #             video_close()
-    #             break
-    #
-    #     video_cap.release()
-    #     cam_cap.release()
-    #     cv2.destroyAllWindows()
+        self.statusBar().showMessage('User' + str(self.u_num))
 
 
 if __name__ == '__main__':
@@ -319,6 +331,7 @@ if __name__ == '__main__':
     ex.show()
     app.exec_()
 
+    # TODO(Kiwi) - Play Video in UI
     # file_num = input('The number of Video : ')
     # filename = 'video' + str(int(file_num)) +'.mp4'
     # # filename = 'video2.mp4'
