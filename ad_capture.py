@@ -1,5 +1,6 @@
 import cv2
 from playsound import playsound
+import av
 
 from multiprocessing import Process
 import ray
@@ -26,6 +27,16 @@ def video_open(video, path="./"):
 
     # time.sleep(15)
     # os.system('taskkill /f /im Video.UI.exe')
+
+    vid_cap = cv2.VideoCapture(path+file)
+    video_frame = int(vid_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    video_fps = int(vid_cap.get(cv2.CAP_PROP_FPS))
+    vid_cap.release()
+
+    # print(video_frame)
+    # print(video_fps)
+
+    return video_frame/video_fps
 
 
 def video_close():
@@ -74,22 +85,48 @@ def video_close():
 # def video_player(file, path='./', ID='Test'):
 def video_player(video, user):
     cam_cap = cv2.VideoCapture(0)
+    cam_width = int(cam_cap.get(3))
+    cam_height = int(cam_cap.get(4))
     # video_cap = cv2.VideoCapture(path+file)
     path = "c:/kiwi/GitHub/rec_ad/Data/AD/"
     video_open(video, path)
+    video_time = video_open(video, path)
 
-    idx = 0
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    save_out = cv2.VideoWriter(('c:/kiwi/Github/rec_ad/Data/Item' + str(video) + '/User' +
+                                str(user) + '/vidCap_i' + str(video) + '_u' + str(user) + '.avi'),
+                               fourcc, 30.0, (cam_width, cam_height))
+
+    # idx = 0
+
+    now = time.time()
+
     while True:
         _, frame = cam_cap.read()
 
-        time.sleep(0.5)
-        cv2.imwrite('c:/kiwi/Github/rec_ad/Data/Item' + str(video) + '/User' + str(user)+ '/cap_' + str(idx) + '.png', frame)
-        idx += 1
+        #################################
+        ### Capture Picture Save Mode ###
+        # time.sleep(0.5)
+        # cv2.imwrite('c:/kiwi/Github/rec_ad/Data/Item' + str(video) + '/User' +
+        #             str(user) + '/cap_' + str(idx) + '.png', frame)
+        # idx += 1
+        # if idx == 30:
+        #     break
+        #################################
+
+        ###############################
+        ### Capture Video Save Mode ###
+        save_out.write(frame)
+        diff = time.time() - now
+        # if diff > 16:
+        #     break
+        if diff > video_time:
+            break
+        ###############################
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        if idx == 30:
-            break
         #
         # _, frame = cam_cap.read()
         # ret1, _ = video_cap.read()
@@ -112,6 +149,36 @@ def video_player(video, user):
     cv2.destroyAllWindows()
 
 
+class Show_Pic(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.lb1 = QtWidgets.QLabel()
+        self.lb2 = QtWidgets.QLabel()
+        self.lb3 = QtWidgets.QLabel()
+
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight)
+        self.setLayout(layout)
+
+        pixmap1 = QtGui.QPixmap('C:/kiwi/GitHub/rec_ad/etc/AD1.png')
+        pixmap2 = QtGui.QPixmap('C:/kiwi/GitHub/rec_ad/etc/AD2.png')
+        pixmap3 = QtGui.QPixmap('C:/kiwi/GitHub/rec_ad/etc/AD3.png')
+
+        pixmap1 = pixmap1.scaledToHeight(60)
+        pixmap2 = pixmap2.scaledToHeight(60)
+        pixmap3 = pixmap3.scaledToHeight(60)
+
+        self.lb1.setPixmap(pixmap1)
+        self.lb2.setPixmap(pixmap2)
+        self.lb3.setPixmap(pixmap3)
+
+        layout.addWidget(self.lb1)
+        layout.addWidget(self.lb2)
+        layout.addWidget(self.lb3)
+
+
 class App(QtWidgets.QMainWindow):
 
     def __init__(self):
@@ -120,13 +187,18 @@ class App(QtWidgets.QMainWindow):
         self.setWindowTitle("Kiwi Recommendation System")
         # self.setGeometry(300, 300, 800, 400)
         self.setWindowIcon((QtGui.QIcon('c:/kiwi/github/rec_ad/etc/kiwi.png')))
-        self.setFixedSize(700, 400)
+        self.setFixedSize(800, 450)
         self.center()
         # self.setStyleSheet("background-color: #808081; border: 1.5px solid #444444;")
         self.statusBar().showMessage('Ready')
 
         # TODO(Kiwi) - insert picture into ui
         # # Video Picture
+        # wg = Show_Pic()
+        # wg.move(20, 20)
+        # wg.resize(100, 100)
+        # self.setCentralWidget(wg)
+
         # pic_path = 'C:/kiwi/GitHub/rec_ad/etc/'
         # pic1 = QtGui.QPixmap(pic_path + 'AD1.png')
         # pic2 = QtGui.QPixmap(pic_path + 'AD2.png')
@@ -179,20 +251,20 @@ class App(QtWidgets.QMainWindow):
         self.gender_line.setFont(QtGui.QFont("나눔바른고딕", 10))
         self.age_line.setFont(QtGui.QFont("나눔바른고딕", 10))
         #
-        self.num_line.move(500, 60)
-        self.name_line.move(500, 100)
-        self.gender_line.move(500, 140)
-        self.age_line.move(500, 180)
+        self.num_line.move(670, 80)
+        self.name_line.move(670, 130)
+        self.gender_line.move(670, 180)
+        self.age_line.move(670, 230)
 
         self.num_label = QtWidgets.QLabel("No.", self)
         self.name_label = QtWidgets.QLabel("이름 : ", self)
         self.gender_label = QtWidgets.QLabel("성별 : ", self)
         self.age_label = QtWidgets.QLabel("나이 : ", self)
 
-        self.num_label.resize(45, 30)
-        self.name_label.resize(45, 30)
-        self.gender_label.resize(45, 30)
-        self.age_label.resize(45, 30)
+        self.num_label.resize(50, 30)
+        self.name_label.resize(50, 30)
+        self.gender_label.resize(50, 30)
+        self.age_label.resize(50, 30)
 
         # self.num_label.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -201,10 +273,10 @@ class App(QtWidgets.QMainWindow):
         self.gender_label.setFont(QtGui.QFont("나눔스퀘어라운드 Bold", 10))
         self.age_label.setFont(QtGui.QFont("나눔스퀘어라운드 Bold", 10))
 
-        self.num_label.move(450, 60)
-        self.name_label.move(450, 100)
-        self.gender_label.move(450, 140)
-        self.age_label.move(450, 180)
+        self.num_label.move(630, 80)
+        self.name_label.move(630, 130)
+        self.gender_label.move(630, 180)
+        self.age_label.move(630, 230)
 
         # #
         # # form_lbx = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight, parent=self)
@@ -233,7 +305,7 @@ class App(QtWidgets.QMainWindow):
         # self.setLayout(gbox)
 
         self.save_btn = QtWidgets.QPushButton("Save", self)
-        self.save_btn.move(500, 220)
+        self.save_btn.move(670, 280)
         self.save_btn.clicked.connect(self.save_clicked)
 
         #
@@ -264,16 +336,38 @@ class App(QtWidgets.QMainWindow):
         self.btn7 = QtWidgets.QPushButton("Video7", self)
         self.btn8 = QtWidgets.QPushButton("Video8", self)
         self.btn9 = QtWidgets.QPushButton("Video9", self)
+        self.btn10 = QtWidgets.QPushButton("Video10", self)
+        self.btn11 = QtWidgets.QPushButton("Video11", self)
+        self.btn12 = QtWidgets.QPushButton("Video12", self)
+        self.btn13 = QtWidgets.QPushButton("Video13", self)
+        self.btn14 = QtWidgets.QPushButton("Video14", self)
+        self.btn15 = QtWidgets.QPushButton("Video15", self)
+        self.btn16 = QtWidgets.QPushButton("Video16", self)
+        self.btn17 = QtWidgets.QPushButton("Video17", self)
+        self.btn18 = QtWidgets.QPushButton("Video18", self)
+        self.btn19 = QtWidgets.QPushButton("Video19", self)
+        self.btn20 = QtWidgets.QPushButton("Video20", self)
 
-        self.btn1.move(20, 80)
-        self.btn2.move(140, 80)
-        self.btn3.move(260, 80)
-        self.btn4.move(20, 200)
-        self.btn5.move(140, 200)
-        self.btn6.move(260, 200)
-        self.btn7.move(20, 320)
-        self.btn8.move(140, 320)
-        self.btn9.move(260, 320)
+        self.btn1.move(20, 60)
+        self.btn2.move(140, 60)
+        self.btn3.move(260, 60)
+        self.btn4.move(380, 60)
+        self.btn5.move(500, 60)
+        self.btn6.move(20, 170)
+        self.btn7.move(140, 170)
+        self.btn8.move(260, 170)
+        self.btn9.move(380, 170)
+        self.btn10.move(500, 170)
+        self.btn11.move(20, 280)
+        self.btn12.move(140, 280)
+        self.btn13.move(260, 280)
+        self.btn14.move(380, 280)
+        self.btn15.move(500, 280)
+        self.btn16.move(20, 390)
+        self.btn17.move(140, 390)
+        self.btn18.move(260, 390)
+        self.btn19.move(380, 390)
+        self.btn20.move(500, 390)
 
         self.video_clicked(self.btn1, 1)
         self.video_clicked(self.btn2, 2)
@@ -284,10 +378,21 @@ class App(QtWidgets.QMainWindow):
         self.video_clicked(self.btn7, 7)
         self.video_clicked(self.btn8, 8)
         self.video_clicked(self.btn9, 9)
+        self.video_clicked(self.btn10, 10)
+        self.video_clicked(self.btn11, 11)
+        self.video_clicked(self.btn12, 12)
+        self.video_clicked(self.btn13, 13)
+        self.video_clicked(self.btn14, 14)
+        self.video_clicked(self.btn15, 15)
+        self.video_clicked(self.btn16, 16)
+        self.video_clicked(self.btn17, 17)
+        self.video_clicked(self.btn18, 18)
+        self.video_clicked(self.btn19, 19)
+        self.video_clicked(self.btn20, 20)
 
         # exit button
         self.exit_btn = QtWidgets.QPushButton("exit", self)
-        self.exit_btn.move(550, 320)
+        self.exit_btn.move(670, 390)
         self.exit_btn.clicked.connect(lambda: QtCore.QCoreApplication.quit())
 
     def center(self):
