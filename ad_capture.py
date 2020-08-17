@@ -251,10 +251,10 @@ class App(QtWidgets.QMainWindow):
         self.gender_line.setFont(QtGui.QFont("나눔바른고딕", 10))
         self.age_line.setFont(QtGui.QFont("나눔바른고딕", 10))
         #
-        self.num_line.move(670, 80)
-        self.name_line.move(670, 130)
-        self.gender_line.move(670, 180)
-        self.age_line.move(670, 230)
+        self.num_line.move(670, 70)
+        self.name_line.move(670, 120)
+        self.gender_line.move(670, 170)
+        self.age_line.move(670, 220)
 
         self.num_label = QtWidgets.QLabel("No.", self)
         self.name_label = QtWidgets.QLabel("이름 : ", self)
@@ -273,10 +273,10 @@ class App(QtWidgets.QMainWindow):
         self.gender_label.setFont(QtGui.QFont("나눔스퀘어라운드 Bold", 10))
         self.age_label.setFont(QtGui.QFont("나눔스퀘어라운드 Bold", 10))
 
-        self.num_label.move(630, 80)
-        self.name_label.move(630, 130)
-        self.gender_label.move(630, 180)
-        self.age_label.move(630, 230)
+        self.num_label.move(630, 70)
+        self.name_label.move(630, 120)
+        self.gender_label.move(630, 170)
+        self.age_label.move(630, 220)
 
         # #
         # # form_lbx = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight, parent=self)
