@@ -18,7 +18,10 @@ import json
 from collections import OrderedDict
 
 
-def video_open(video, path="./"):
+abs_path = os.getcwd()
+
+
+def video_open(video, path):
     # os.popen("C:/kiwi/ui_basic/video1.mp4")
     # os.system("C:/kiwi/ui_basic/video1.mp4")
     file = "AD" + str(video) + ".mp4"
@@ -88,12 +91,12 @@ def video_player(video, user):
     cam_width = int(cam_cap.get(3))
     cam_height = int(cam_cap.get(4))
     # video_cap = cv2.VideoCapture(path+file)
-    path = "c:/kiwi/GitHub/rec_ad/Data/AD/"
+    path = abs_path + '/Data/AD/'
     video_open(video, path)
     video_time = video_open(video, path)
 
     fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    save_out = cv2.VideoWriter(('c:/kiwi/Github/rec_ad/Data/Item' + str(video) + '/User' +
+    save_out = cv2.VideoWriter((abs_path + '/Data/Item' + str(video) + '/User' +
                                 str(user) + '/vidCap_i' + str(video) + '_u' + str(user) + '.avi'),
                                fourcc, 30.0, (cam_width, cam_height))
 
@@ -120,7 +123,7 @@ def video_player(video, user):
         diff = time.time() - now
         # if diff > 16:
         #     break
-        if diff > video_time:
+        if diff > video_time + 0.5:
             break
         ###############################
 
@@ -162,9 +165,9 @@ class Show_Pic(QtWidgets.QWidget):
         layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight)
         self.setLayout(layout)
 
-        pixmap1 = QtGui.QPixmap('C:/kiwi/GitHub/rec_ad/etc/AD1.png')
-        pixmap2 = QtGui.QPixmap('C:/kiwi/GitHub/rec_ad/etc/AD2.png')
-        pixmap3 = QtGui.QPixmap('C:/kiwi/GitHub/rec_ad/etc/AD3.png')
+        pixmap1 = QtGui.QPixmap(abs_path + '/etc/AD1.png')
+        pixmap2 = QtGui.QPixmap(abs_path + '/etc/AD2.png')
+        pixmap3 = QtGui.QPixmap(abs_path + '/etc/AD3.png')
 
         pixmap1 = pixmap1.scaledToHeight(60)
         pixmap2 = pixmap2.scaledToHeight(60)
@@ -186,7 +189,7 @@ class App(QtWidgets.QMainWindow):
         # Application Window
         self.setWindowTitle("Kiwi Recommendation System")
         # self.setGeometry(300, 300, 800, 400)
-        self.setWindowIcon((QtGui.QIcon('c:/kiwi/github/rec_ad/etc/kiwi.png')))
+        self.setWindowIcon((QtGui.QIcon(abs_path + '/etc/kiwi.png')))
         self.setFixedSize(800, 450)
         self.center()
         # self.setStyleSheet("background-color: #808081; border: 1.5px solid #444444;")
@@ -423,7 +426,7 @@ class App(QtWidgets.QMainWindow):
         file_data["Name"] = self.name_line.text()
         file_data["Gender"] = self.gender_line.text()
         file_data["Age"] = self.age_line.text()
-        with open("./userInfo/User" + str(self.u_num) + ".json", "w", encoding="utf-8") as make_file:
+        with open(abs_path + "/userInfo/User" + str(self.u_num) + ".json", "w", encoding="utf-8") as make_file:
             json.dump(file_data, make_file, ensure_ascii=False, indent='\t')
 
         self.statusBar().showMessage('User' + str(self.u_num))
