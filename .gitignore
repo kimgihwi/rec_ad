@@ -3,6 +3,9 @@ Data
 etc
 userInfo
 
+# experiment dir
+experiment
+
 #etc
 .idea
 *.csv
