@@ -10,3 +10,5 @@ experiment
 #etc
 .idea
 *.csv
+*.png
+*.exe

@@ -7,9 +7,12 @@ import numpy as np
 import pandas as pd
 
 
-def video_capture(file, color='color', mode='save'):
+def video_capture(file, user, path='./', savepath='./', color='color', mode='save'):
     """
     :param file: video file name, type == str()
+    :param user: user number, type == int()
+    :param path: video file path, type == str()
+    :param savepath: crop image saving path, type == str()
     :param color: color default value is 'color'. If you want to use gray image, then set mode to 'gray'.
     :param mode: mode default value is 'save'. If you want to get image coordinate, then set mode to 'save'.
     :return: If you set mode to 'coordinate', then you could get coordinates of cropped image.
@@ -17,7 +20,7 @@ def video_capture(file, color='color', mode='save'):
 
     face_cascade = cv2.CascadeClassifier('./detector/haarcascade_frontalface_alt.xml')
 
-    vid = cv2.VideoCapture('./data/video/' + file)
+    vid = cv2.VideoCapture(path + '/' + file)
     iterator = 0        # while iterator
     img_idx = 0     # cropped image index
 
@@ -37,16 +40,17 @@ def video_capture(file, color='color', mode='save'):
         if color == 'gray':
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        faces = face_cascade.detectMultiScale(img, 1.3, 5)  # image scale
+        faces = face_cascade.detectMultiScale(img, 1.3, 1)  # image scale
 
         # control capture interval
-        if iterator % 4 != 0:
+        if iterator % 10 != 0:
             iterator += 1
             continue
 
         for (x, y, w, h) in faces:
-            cropped = img[y - int(h / 4):y + h + int(h / 4), x - int(w / 4):x + w + int(w / 4)]  # cropped image
-            cv2.imwrite('./data/crop3/crop_img_' + str(img_idx) + '.png', cropped)    # save cropped image
+            # cropped = img[y - int(h / 4):y + h + int(h / 4), x - int(w / 4):x + w + int(w / 4)]  # cropped image
+            cropped = img[y:y + h, x:x + w]
+            cv2.imwrite(savepath + '/' + str(user) + '_' + str(img_idx) + '.png', cropped)    # save cropped image
 
             # if you want to get face recognition coordinate for each image
             if mode == 'coordinate':
@@ -180,9 +184,14 @@ def landmark_table_diff(df, mode=''):
 
 if __name__ == '__main__':
     print("excute main")
-    video_capture('happy.avi', color='gray')
-    landmarks = face_landmark('crop3')
+    # video_capture('happy.avi', color='gray')
+    # landmarks = face_landmark('crop3')
+    #
+    # tmp_table = landmark_table(landmarks, 'x', mode='save')
+    #
+    # landmark_table_diff(tmp_table, mode='save')
 
-    tmp_table = landmark_table(landmarks, 'x', mode='save')
-
-    landmark_table_diff(tmp_table, mode='save')
+    User = 9
+    Video = 8
+    video_capture('User' + str(User) + '_Video' + str(Video) + '.avi', user=User, path='./Data/' + str(User),
+                  savepath='./data/crop', mode='save')
