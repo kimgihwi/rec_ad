@@ -13,7 +13,7 @@ class CNN(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=3, kernel_size=5, stride=1)
         self.conv2 = nn.Conv2d(in_channels=3, out_channels=10, kernel_size=5, stride=1)
         self.fc1 = nn.Linear(10 * 155 * 155, 50)
-        self.fc2 = nn.Linear(50, 10)
+        self.fc2 = nn.Linear(50, 5)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -63,8 +63,9 @@ if __name__ == '__main__':
 
     sim_list = []
 
-    for i in range(29):
-        print(cos_sim(output[i].detach().numpy(), output[0].detach().numpy()))
+    for i in range(1, 29):
+        # print(cos_sim(output[i].detach().numpy(), output[0].detach().numpy()))
+        print(output[i].detach().numpy())
         sim_list.append(cos_sim(output[i].detach().numpy(), output[0].detach().numpy()))
 
     import matplotlib.pyplot as plt
