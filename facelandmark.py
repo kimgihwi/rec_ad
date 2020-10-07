@@ -1,5 +1,7 @@
 import cv2
 import dlib
+import face_recognition
+from PIL import Image
 
 import os
 
@@ -7,7 +9,8 @@ import numpy as np
 import pandas as pd
 
 
-def video_capture(file, user, path='./', savepath='./', color='color', mode='save'):
+# def video_capture(file, user, path='./', savepath='./', color='color', mode='save'):
+def video_capture(file, user, path='./', savepath='./', color='color'):
     """
     :param file: video file name, type == str()
     :param user: user number, type == int()
@@ -40,32 +43,38 @@ def video_capture(file, user, path='./', savepath='./', color='color', mode='sav
         if color == 'gray':
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        faces = face_cascade.detectMultiScale(img, 1.3, 1)  # image scale
-
         # control capture interval
         # video fps == 30, so 30/15 -> crop 2frame
         if iterator % 15 != 0:
             iterator += 1
             continue
 
-        for (x, y, w, h) in faces:
-            # cropped = img[y - int(h / 4):y + h + int(h / 4), x - int(w / 4):x + w + int(w / 4)]  # cropped image
-            cropped = img[y:y + h, x:x + w]
-            # cv2.imwrite(savepath + '/' + str(user) + '_' + str(img_idx) + '.png', cropped)    # save cropped image
-            cv2.imwrite(savepath + '/' + str(img_idx) + '.png', cropped)
+        # faces = face_cascade.detectMultiScale(img, 1.3, 5)
+        # for (x, y, w, h) in faces:
+        #     # cropped = img[y - int(h / 4):y + h + int(h / 4), x - int(w / 4):x + w + int(w / 4)]  # cropped image
+        #     cropped = img[y:y + h, x:x + w]
+        #     # cv2.imwrite(savepath + '/' + str(user) + '_' + str(img_idx) + '.png', cropped)    # save cropped image
+        #     cv2.imwrite(savepath + '/' + str(img_idx) + '.png', cropped)
+        #
+        #     # if you want to get face recognition coordinate for each image
+        #     if mode == 'coordinate':
+        #         x_co_list.append(x)
+        #         y_co_list.append(y)
+        #         height_list.append(h)
+        #         width_list.append(w)
 
-            # if you want to get face recognition coordinate for each image
-            if mode == 'coordinate':
-                x_co_list.append(x)
-                y_co_list.append(y)
-                height_list.append(h)
-                width_list.append(w)
+        face_locations = face_recognition.face_locations(img)
+        for face_location in face_locations:
+            top, right, bottom, left = face_location
+            face_image = img[top:bottom, left:right]
+            # pil_image = Image.fromarray(face_image)
+            cv2.imwrite(savepath + '/' + str(img_idx) + '.png', face_image)
 
         iterator += 1
         img_idx += 1
 
-        if mode == 'coordinate':
-            return np.array([x_co_list, y_co_list, height_list, width_list])
+        # if mode == 'coordinate':
+        #     return np.array([x_co_list, y_co_list, height_list, width_list])
 
         print("image " + str(img_idx) + " cropped success")
 
@@ -199,6 +208,14 @@ if __name__ == '__main__':
     #               savepath='./data/crop', mode='save')
 
     video = 1
+    # user = 1
     for i in range(1, 34):
         video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
-                      savepath='./Data/crop/video' + str(video) + '/' + str(i), mode='save')
+                      savepath='./Data/crop/video' + str(video) + '/' + str(i))
+        # video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
+        #               savepath='./Data/crop/video' + str(video) + '/' + str(i), mode='save')
+
+    # video_capture(str(user) + '.avi', user=user, path='./Data/video' + str(video),
+    #               savepath='./Data/crop/video' + str(video) + '/' + str(user), mode='save')
+    # video_capture(str(user) + '.avi', user=user, path='./Data/video' + str(video),
+    #               savepath='./Data/crop/video' + str(video) + '/' + str(user))
