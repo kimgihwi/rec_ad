@@ -8,6 +8,8 @@ import os
 import numpy as np
 import pandas as pd
 
+from tqdm import tqdm
+
 
 # def video_capture(file, user, path='./', savepath='./', color='color', mode='save'):
 def video_capture(file, user, path='./', savepath='./', color='color'):
@@ -76,7 +78,7 @@ def video_capture(file, user, path='./', savepath='./', color='color'):
         # if mode == 'coordinate':
         #     return np.array([x_co_list, y_co_list, height_list, width_list])
 
-        print("image " + str(img_idx) + " cropped success")
+        # print("image " + str(img_idx) + " cropped success")
 
 
 def face_landmark(path, mode='normal'):
@@ -207,11 +209,18 @@ if __name__ == '__main__':
     # video_capture('User' + str(User) + '_Video' + str(Video) + '.avi', user=User, path='./Data/' + str(User),
     #               savepath='./data/crop', mode='save')
 
-    video = 1
+    # video = 1
     # user = 1
-    for i in range(1, 34):
-        video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
-                      savepath='./Data/crop/video' + str(video) + '/' + str(i))
+    numUser = 33
+    numUser += 1
+    # for i in tqdm(range(1, numUser)):
+    #     video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
+    #                   savepath='./Data/crop/video' + str(video) + '/' + str(i))
+    for video in range(2,5):
+        for i in tqdm(range(1, numUser)):
+            video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
+                            savepath='./Data/crop/video' + str(video) + '/' + str(i))
+        # print("remain " + str(i) + "/" + str(numUser-1))
         # video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
         #               savepath='./Data/crop/video' + str(video) + '/' + str(i), mode='save')
 
