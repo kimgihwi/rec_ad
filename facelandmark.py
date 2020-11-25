@@ -19,21 +19,21 @@ def video_capture(file, user, path='./', savepath='./', color='color'):
     :param path: video file path, type == str()
     :param savepath: crop image saving path, type == str()
     :param color: color default value is 'color'. If you want to use gray image, then set mode to 'gray'.
-    :param mode: mode default value is 'save'. If you want to get image coordinate, then set mode to 'save'.
+    # :param mode: mode default value is 'save'. If you want to get image coordinate, then set mode to 'save'.
     :return: If you set mode to 'coordinate', then you could get coordinates of cropped image.
     """
 
-    face_cascade = cv2.CascadeClassifier('./detector/haarcascade_frontalface_alt.xml')
+    # face_cascade = cv2.CascadeClassifier('./detector/haarcascade_frontalface_alt.xml')
 
     vid = cv2.VideoCapture(path + '/' + file)
     iterator = 0        # while iterator
     img_idx = 0     # cropped image index
 
-    # face coordinate list for each image
-    x_co_list = []
-    y_co_list = []
-    height_list = []
-    width_list = []
+    # # face coordinate list for each image
+    # x_co_list = []
+    # y_co_list = []
+    # height_list = []
+    # width_list = []
 
     while vid.isOpened():
         ret, img = vid.read()
@@ -46,7 +46,7 @@ def video_capture(file, user, path='./', savepath='./', color='color'):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # control capture interval
-        # video fps == 30, so 30/15 -> crop 2frame
+        # video fps == 30, so 30/15 -> crop 2frame for 1sec
         if iterator % 15 != 0:
             iterator += 1
             continue
@@ -57,15 +57,15 @@ def video_capture(file, user, path='./', savepath='./', color='color'):
         #     cropped = img[y:y + h, x:x + w]
         #     # cv2.imwrite(savepath + '/' + str(user) + '_' + str(img_idx) + '.png', cropped)    # save cropped image
         #     cv2.imwrite(savepath + '/' + str(img_idx) + '.png', cropped)
-        #
-        #     # if you want to get face recognition coordinate for each image
-        #     if mode == 'coordinate':
-        #         x_co_list.append(x)
-        #         y_co_list.append(y)
-        #         height_list.append(h)
-        #         width_list.append(w)
 
-        face_locations = face_recognition.face_locations(img)
+            # # if you want to get face recognition coordinate for each image
+            # if mode == 'coordinate':
+            #     x_co_list.append(x)
+            #     y_co_list.append(y)
+            #     height_list.append(h)
+            #     width_list.append(w)
+
+        face_locations = face_recognition.face_locations(img, model="cnn")
         for face_location in face_locations:
             top, right, bottom, left = face_location
             face_image = img[top:bottom, left:right]
@@ -210,16 +210,16 @@ if __name__ == '__main__':
     #               savepath='./data/crop', mode='save')
 
     # video = 1
-    # user = 1
-    numUser = 33
-    numUser += 1
+    # user = 100
+    # numUser = 33
+    # numUser += 1
     # for i in tqdm(range(1, numUser)):
     #     video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
     #                   savepath='./Data/crop/video' + str(video) + '/' + str(i))
-    for video in range(2,5):
-        for i in tqdm(range(1, numUser)):
-            video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
-                            savepath='./Data/crop/video' + str(video) + '/' + str(i))
+    # for video in [1, 2, 4]:
+    #     for i in tqdm(range(1, numUser)):
+    #         video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
+    #                         savepath='./Data/crop/video' + str(video) + '/' + str(i))
         # print("remain " + str(i) + "/" + str(numUser-1))
         # video_capture(str(i) + '.avi', user=i, path='./Data/video' + str(video),
         #               savepath='./Data/crop/video' + str(video) + '/' + str(i), mode='save')
@@ -228,3 +228,13 @@ if __name__ == '__main__':
     #               savepath='./Data/crop/video' + str(video) + '/' + str(user), mode='save')
     # video_capture(str(user) + '.avi', user=user, path='./Data/video' + str(video),
     #               savepath='./Data/crop/video' + str(video) + '/' + str(user))
+
+    # for user in tqdm(range(1, 38)):
+    #     for video in range(1, 21):
+    #         video_capture(str(user) + '.avi', user=user, path='./Data/video' + str(video),
+    #                       savepath='./Data/crop/video' + str(video) + '/' + str(user))
+
+    for user in range(38, 39):
+        for video in tqdm(range(1, 21)):
+            video_capture(str(user) + '.avi', user=user, path='./Data/video' + str(video),
+                          savepath='./Data/crop/video' + str(video) + '/' + str(user))

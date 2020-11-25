@@ -2,9 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from PIL import Image
+
 import cv2
 
 import numpy as np
+
+from numpy import dot
+from numpy.linalg import norm
 
 
 class CNN(nn.Module):
@@ -25,15 +30,8 @@ class CNN(nn.Module):
         return x
 
 
-from numpy import dot
-from numpy.linalg import norm
-
-
 def cos_sim(A, B):
     return dot(A, B) / (norm(A) * norm(B))
-
-
-from PIL import Image
 
 
 if __name__ == '__main__':
