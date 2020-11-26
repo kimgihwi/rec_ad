@@ -3,7 +3,6 @@ import cv2
 import os
 
 
-
 class ImageDiff:
     def __init__(self, path, time):
         self.path = path
@@ -27,7 +26,6 @@ class ImageDiff:
     def imgDiff(self):
         for idx in range(self.time):
             print('a')
-
 
 
 if __name__=='__main__':
