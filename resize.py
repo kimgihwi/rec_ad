@@ -33,6 +33,7 @@ def imgResize(path, user, video):
 #         imgResize(tmp_path, u, v)
 
 for v in tqdm(range(1, 20+1)):
-    for u in range(38, 39):
-        tmp_path = './Data/crop/CNN based/video' + str(v) + '/' + str(u)
+    for u in range(73, 79):
+        # tmp_path = './Data/crop/CNN based/video' + str(v) + '/' + str(u)
+        tmp_path = './Data/crop/CNN based/preprocessing/video' + str(v) + '/' + str(u)
         imgResize(tmp_path, u, v)

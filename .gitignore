@@ -12,3 +12,5 @@ experiment
 *.csv
 *.png
 *.exe
+*.json
+*.txt

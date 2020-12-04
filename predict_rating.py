@@ -25,7 +25,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0")
 
 
 data_transforms = {
@@ -36,7 +37,7 @@ data_transforms = {
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
-        transforms.Resize(256),
+        # transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -49,7 +50,7 @@ class RatingDataset(Dataset):
     def __init__(self, video, time, user, val=False, transform=None):
         self.val = val
         self.user = user-1
-        self.root_dir = './Data/inputData/video{video}/time{time}/'.format(video=video, time=time)
+        self.root_dir = './Data/inputData/rating/video{video}/time{time}/'.format(video=video, time=time)
         self.transform = transform
 
         label_list = list(pd.read_csv('./Data/rating.csv', index_col='user').astype(int)['video{0}'.format(video)])
@@ -60,7 +61,7 @@ class RatingDataset(Dataset):
         # for file in range(self.__len__()):
         for file in range(len(label_list)):
             # img_list.append(cv2.imread(self.root_dir + '/user{file}.png'.format(file=file+1)))
-            img_list.append(Image.open(self.root_dir + '/user{file}.png'.format(file=file+1)))
+            img_list.append(Image.open(self.root_dir + 'user{file}.png'.format(file=file+1)))
         # self.img = img_list
 
         if self.val:
@@ -223,10 +224,16 @@ class RatingDataset(Dataset):
 
 class modelEvaluation:
 
-    def __init__(self, video, time, user):
+    def __init__(self, video, time, user, epoch=25):
         self.video = video
         self.time = time
         self.user = user
+        self.answer = []
+        self.train_loss_list = []
+        self.val_loss_list = []
+        self.train_acc_list = []
+        self.val_acc_list = []
+        self.pred_list = []
 
         train_dataset = RatingDataset(video=self.video, time=self.time, user=self.user,
                                       transform=data_transforms['train'])
@@ -234,11 +241,11 @@ class modelEvaluation:
                                     transform=data_transforms['val'])
         self.dataloaders = {'train': torch.utils.data.DataLoader(train_dataset, batch_size=4,
                                                                  shuffle=True, num_workers=0),
-                       'val': torch.utils.data.DataLoader(val_dataset, batch_size=1,
-                                                          shuffle=False, num_workers=0)}
+                            'val': torch.utils.data.DataLoader(val_dataset, batch_size=1,
+                                                               shuffle=False, num_workers=0)}
 
         self.dataset_size = {'train': train_dataset.__len__(),
-                        'val': val_dataset.__len__()}
+                             'val': val_dataset.__len__()}
 
         model_ft = models.resnet18(pretrained=True)
         num_ftrs = model_ft.fc.in_features
@@ -254,19 +261,30 @@ class modelEvaluation:
         # Decay LR by a factor of 0.1 every 7 epochs
         exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
-        model_ft = self.train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+        # model_ft = self.train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=epoch)
+        self.train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=epoch)
+
+    def getAnswer(self):
+        return self.answer
+
+    def resultValue(self):
+        return self.pred_list, self.train_acc_list, self.val_acc_list, self.train_loss_list, self.val_loss_list
 
     def train_model(self, model, criterion, optimizer, scheduler, num_epochs=25):
         since = time.time()
 
-        best_model_wts = copy.deepcopy(model.state_dict())
-        best_acc = 0.0
-
-        pred_list = []
+        # best_model_wts = copy.deepcopy(model.state_dict())
+        # best_acc = 0.0
 
         for epoch in range(num_epochs):
-            print('Epoch {}/{}'.format(epoch, num_epochs - 1))
-            print('-' * 10)
+            train_loss_list = []
+            val_loss_list = []
+            train_acc_list = []
+            val_acc_list = []
+            pred_list = []
+
+            # print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+            # print('-' * 10)
 
             # 각 에폭(epoch)은 학습 단계와 검증 단계를 갖습니다.
             for phase in ['train', 'val']:
@@ -306,36 +324,81 @@ class modelEvaluation:
 
                     if phase == 'val':
                         pred_list.append(preds.tolist()[0]+1)
+                        # if preds == labels.data:
+                        #     self.answer.append(1)
+                        # else:
+                        #     self.answer.append(0)
 
                 if phase == 'train':
                     scheduler.step()
                 epoch_loss = running_loss / self.dataset_size[phase]
                 epoch_acc = running_corrects.double() / self.dataset_size[phase]
 
-                print('{} Loss: {:.4f} Acc: {:.4f}'.format(
-                    phase, epoch_loss, epoch_acc))
+                if phase == 'train':
+                    train_loss_list.append(epoch_loss)
+                    train_acc_list.append(epoch_acc)
+                else:
+                    val_loss_list.append(epoch_loss)
+                    val_acc_list.append(epoch_acc)
 
-                # 모델을 깊은 복사(deep copy)함
-                if phase == 'val' and epoch_acc > best_acc:
-                    best_acc = epoch_acc
-                    best_model_wts = copy.deepcopy(model.state_dict())
+                # print('{} Loss: {:.4f} Acc: {:.4f}'.format(
+                #     phase, epoch_loss, epoch_acc))
 
-            with open('user{user}_video{video}_time{time}.csv'.format(user=self.user, video=self.video, time=self.time),
-                      'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(pred_list)
+            self.train_loss_list = train_loss_list
+            self.val_loss_list = val_loss_list
+            self.train_acc_list = train_acc_list
+            self.val_acc_list = val_acc_list
+            self.pred_list = pred_list
+
+                # # 모델을 깊은 복사(deep copy)함
+                # if phase == 'val' and epoch_acc > best_acc:
+                #     best_acc = epoch_acc
+                #     best_model_wts = copy.deepcopy(model.state_dict())
+
+            # with open('user{user}_video{video}_time{time}.csv'.format(user=self.user, video=self.video, time=self.time),
+            #           'w', newline='') as f:
+            #     writer = csv.writer(f)
+            #     writer.writerow(pred_list)
 
         time_elapsed = time.time() - since
-        print('Training complete in {:.0f}m {:.0f}s'.format(
-            time_elapsed // 60, time_elapsed % 60))
-        print('Best val Acc: {:4f}'.format(best_acc))
+        print('Video{video} User{user} Time{time} Training complete in {:.0f}m {:.0f}s'.format(
+            time_elapsed // 60, time_elapsed % 60, video=self.video, user=self.user, time=self.time))
+        # print('Best val Acc: {:4f}'.format(best_acc))
 
-        # 가장 나은 모델 가중치를 불러옴
-        model.load_state_dict(best_model_wts)
-
-        return model
+        # # 가장 나은 모델 가중치를 불러옴
+        # model.load_state_dict(best_model_wts)
+        #
+        # return model
 
 
 if __name__ == '__main__':
-    for user in range(1, 38):
-        modelEvaluation(video=1, time=1, user=user)
+
+    video = 1
+
+    pred_list = []
+    train_acc_list = []
+    test_acc_list = []
+    train_loss_list = []
+    test_loss_list = []
+
+    for t in tqdm(range(1, 61)):
+        for user in tqdm(range(1, 78)):
+            pred, train_acc, test_acc, train_loss, test_loss \
+                = modelEvaluation(video=video, time=t, user=user, epoch=10).resultValue()
+            pred_list.append(pred)
+            train_acc_list.append(train_acc)
+            test_acc_list.append(test_acc)
+            train_loss_list.append(train_loss)
+            train_loss_list.append(test_loss)
+
+        df_pred = pd.DataFrame(pred_list)
+        df_train_acc = pd.DataFrame(train_acc_list)
+        df_test_acc = pd.DataFrame(test_acc_list)
+        df_train_loss = pd.DataFrame(train_loss_list)
+        df_test_loss = pd.DataFrame(test_loss_list)
+
+        df_pred.to_csv('./result/predict rating/predict/video{video}/time{time}.csv'.format(video=video, time=t))
+        df_train_acc.to_csv('./result/predict rating/train acc/video{video}/time{time}.csv'.format(video=video, time=t))
+        df_train_loss.to_csv('./result/predict rating/train loss/video{video}/time{time}.csv'.format(video=video, time=t))
+        df_test_acc.to_csv('./result/predict rating/test acc/video{video}/time{time}.csv'.format(video=video, time=t))
+        df_test_loss.to_csv('./result/predict rating/test loss/video{video}/time{time}.csv'.format(video=video, time=t))
