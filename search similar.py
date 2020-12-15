@@ -32,6 +32,18 @@ class searchSim:
                 best_user = u[4:]
         return best_user
 
+    def calUserSim(self, time):
+        sim_list = []
+        for u in self.user_list:
+            sim_list.append(self.calSim(self.df_kps.iloc[self.user][:time+1], self.df_kps.loc[u][:time+1]))
+        return sim_list
+
+    def calUserSim2(self, user, time):
+        sim_list = []
+        for u in self.user_list:
+            sim_list.append(self.calSim(self.df_kps.iloc[self.user][:time+1], self.df_kps.loc[u][:time+1]))
+        return sim_list
+
     def getSimList(self):
         sim_list = []
         for t in range(len(self.df_kps.T)):
@@ -47,3 +59,17 @@ if __name__ == '__main__':
             tmp_list.append(searchSim(video, user).getSimList())
         tmp_df = pd.DataFrame(tmp_list, index=['user{}'.format(u) for u in range(1, 78)])
         tmp_df.to_csv('./result/similar user/kps_video{video}.csv'.format(video=video))
+
+    # total_time = 12
+    # video_ = [2]
+    # # video_ = [3, 4, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19]
+    # # video_ = [1, 5, 7, 12, 14, 20]
+    # # video_ = [6]
+    # for video in tqdm(video_):
+    #     df_sim = pd.DataFrame(columns=['time{}'.format(t) for t in range(1, total_time+1)])
+    #     for user in range(1, 78):
+    #         tmp_time_sim = []
+    #         for time in range(1, total_time+1):
+    #             tmp_time_sim.append(searchSim(video, user).calUserSim(time=time))
+    #         df_sim.loc['user{}'.format(user)] = tmp_time_sim
+    #     df_sim.to_csv('./result/similar user/kps/video{}.csv'.format(video))
