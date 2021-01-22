@@ -45,10 +45,12 @@ class EvaluationPredictRating:
         best_epoch = -1
         MAE_list = []
 
-        df_eval = self.getPredictData('./result/predict rating/predict', time=1)
+        df_eval = self.getPredictData('./result/predict rating/resnet34/predict', time=1)
+        # df_eval = self.getPredictData('./result/predict rating/predict', time=1)
         if self.time > 1:
             for time in range(1, self.time):
-                df_eval += self.getPredictData('./result/predict rating/predict', time=time)
+                # df_eval += self.getPredictData('./result/predict rating/predict', time=time)
+                df_eval += self.getPredictData('./result/predict rating/resnet34/predict', time=time)
         df_eval = df_eval/self.time
 
         for epoch in range(0, 10):
@@ -199,14 +201,16 @@ if __name__ == '__main__':
     # video_ = [2]
     # video_ = [3, 4, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19]
     # video_ = [1, 5, 7, 12, 14, 20]
-    video_ = [6]
+    # video_ = [6]
+    video_ = [13]
 
     for video in video_:
         df_MAE = pd.DataFrame()
-        for time in range(1, 51):
+        for time in range(1, 16):
             df_MAE['time{}'.format(time)] = EvaluationPredictRating(video=video, time=time).getMAE()
             df_MAE = df_MAE.rename(index={0: 'MAE', 1: 'epoch'})
-        df_MAE.to_csv('./result/predict rating/predict/mae/model/total/video{}.csv'.format(video))
+        # df_MAE.to_csv('./result/predict rating/predict/mae/model/total/video{}.csv'.format(video))
+        df_MAE.to_csv('./result/predict rating/resnet34/predict/mae_video{}.csv'.format(video))
 
 
     ### evaluation to average rating
