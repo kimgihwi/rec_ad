@@ -22,6 +22,12 @@ abs_path = os.getcwd()
 
 
 def video_open(video, path):
+    """
+    :param video: number of video
+    :param path: path of video file
+    :return: sec of video
+    """
+
     # os.popen("C:/kiwi/ui_basic/video1.mp4")
     # os.system("C:/kiwi/ui_basic/video1.mp4")
     file = "AD" + str(video) + ".mp4"
@@ -43,6 +49,9 @@ def video_open(video, path):
 
 
 def video_close():
+    """
+    :return: if video is successfully closed, then it returns True
+    """
     os.system('taskkill /f /im Video.UI.exe')
     return True
 #
@@ -87,6 +96,11 @@ def video_close():
 
 # def video_player(file, path='./', ID='Test'):
 def video_player(video, user):
+    """
+    :param video: number of video
+    :param user: number of user
+    :return: nothing
+    """
     cam_cap = cv2.VideoCapture(0)
     cam_width = int(cam_cap.get(3))
     cam_height = int(cam_cap.get(4))
@@ -440,7 +454,7 @@ if __name__ == '__main__':
     app.exec_()
 
     # TODO(Kiwi) - Play Video in UI
-    # file_num = input('The number of Video : ')
+    # file_num = input('Number of Video : ')
     # filename = 'video' + str(int(file_num)) +'.mp4'
     # # filename = 'video2.mp4'
     # user_num = input('User : ')

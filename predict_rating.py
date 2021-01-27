@@ -240,9 +240,9 @@ class modelEvaluation:
         val_dataset = RatingDataset(video=self.video, time=self.time, user=self.user, val=True,
                                     transform=data_transforms['val'])
         self.dataloaders = {'train': torch.utils.data.DataLoader(train_dataset, batch_size=4,
-                                                                 shuffle=True, num_workers=0),
+                                                                 shuffle=True, num_workers=0, pin_memory=True),
                             'val': torch.utils.data.DataLoader(val_dataset, batch_size=1,
-                                                               shuffle=False, num_workers=0)}
+                                                               shuffle=False, num_workers=0, pin_memory=True)}
 
         self.dataset_size = {'train': train_dataset.__len__(),
                              'val': val_dataset.__len__()}
@@ -253,7 +253,7 @@ class modelEvaluation:
 
         model_ft = model_ft.to(device)
 
-        criterion = torch.nn.CrossEntropyLoss()
+        criterion = torch.nn.CrossEntropyLoss().to(device)
 
         # Observe that all parameters are being optimized
         optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
@@ -336,10 +336,10 @@ class modelEvaluation:
 
                 if phase == 'train':
                     train_loss_list.append(epoch_loss)
-                    train_acc_list.append(epoch_acc)
+                    train_acc_list.append(epoch_acc.float())
                 else:
                     val_loss_list.append(epoch_loss)
-                    val_acc_list.append(epoch_acc)
+                    val_acc_list.append(epoch_acc.float())
 
                 # print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 #     phase, epoch_loss, epoch_acc))
@@ -375,21 +375,23 @@ if __name__ == '__main__':
 
     video = 1
 
-    pred_list = []
-    train_acc_list = []
-    test_acc_list = []
-    train_loss_list = []
-    test_loss_list = []
+    for t in tqdm(range(1, 31)):
 
-    for t in tqdm(range(1, 61)):
+        pred_list = []
+        train_acc_list = []
+        test_acc_list = []
+        train_loss_list = []
+        test_loss_list = []
+
         for user in tqdm(range(1, 78)):
             pred, train_acc, test_acc, train_loss, test_loss \
                 = modelEvaluation(video=video, time=t, user=user, epoch=10).resultValue()
+
             pred_list.append(pred)
             train_acc_list.append(train_acc)
             test_acc_list.append(test_acc)
             train_loss_list.append(train_loss)
-            train_loss_list.append(test_loss)
+            test_loss_list.append(test_loss)
 
         df_pred = pd.DataFrame(pred_list)
         df_train_acc = pd.DataFrame(train_acc_list)

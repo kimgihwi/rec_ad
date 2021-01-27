@@ -17,6 +17,12 @@ from tqdm import tqdm, tqdm_notebook
 
 
 def imgResize(path, user, video):
+    """
+    :param path: path of image
+    :param user: number of user
+    :param video: number of video
+    :return: nothing
+    """
     img_list = os.listdir(path)
     for img in img_list:
         tmp_img = cv2.imread(path + '/' + img)

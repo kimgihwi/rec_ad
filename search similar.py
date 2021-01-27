@@ -7,6 +7,10 @@ from tqdm import tqdm, tqdm_notebook
 class searchSim:
 
     def __init__(self, video, user):
+        """
+        :param video: number of video
+        :param user: number of user
+        """
         self.video = video
         self.user = user-1
         self.df_kps = self.readKPS()
@@ -14,6 +18,10 @@ class searchSim:
         self.user_list.remove('user{user}'.format(user=user))
 
     def readKPS(self):
+        """
+        calculate keypoint score of each user in video
+        :return: dataframe of kps in video
+        """
         df_kps = pd.read_csv('./result/kps/kps_video{video}.csv'.format(video=self.video), index_col=0, header=0)
         return df_kps
 

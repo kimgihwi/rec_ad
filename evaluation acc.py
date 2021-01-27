@@ -3,6 +3,9 @@ import numpy as np
 
 
 class EvaluationPredictAccuracy:
+    """
+    this class is used at calculation of best accuracy
+    """
 
     def __init__(self, video, time, epoch):
         self.video = video

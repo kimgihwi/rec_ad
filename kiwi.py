@@ -18,6 +18,11 @@ abs_path = os.getcwd()
 
 
 def video_open(video, path):
+    """
+    :param video: number of video
+    :param path: path of video
+    :return: sec of video
+    """
     file = "./" + str(video) + "/AD" + str(video) + ".mp4"
     os.system(path+file)
 
@@ -30,11 +35,19 @@ def video_open(video, path):
 
 
 def video_close():
+    """
+    :return: if video is successfully closed, then it returns True
+    """
     os.system('taskkill /f /im Video.UI.exe')
     return True
 
 
 def video_player(video, user):
+    """
+    :param video: number of video
+    :param user: number of user
+    :return: nothing
+    """
     cam_cap = cv2.VideoCapture(0)
     cam_width = int(cam_cap.get(3))
     cam_height = int(cam_cap.get(4))
@@ -79,6 +92,9 @@ def video_player(video, user):
 
 
 class App(QtWidgets.QMainWindow):
+    """
+    video player UI
+    """
 
     def __init__(self):
         super().__init__()

@@ -13,6 +13,11 @@ class TopNRecommender:
         self.bestseller = [12, 11, 5, 18, 20, 17, 6, 1, 3, 7, 4, 8, 13, 9, 10, 14, 19, 15, 2, 16]
 
     def sortRating(self, user, top):
+        """
+        :param user: number of user
+        :param top: N of top-N
+        :return: top-N list
+        """
         df = self.readRatingData()
         tmp_list = df.loc['user{}'.format(user)]
 
@@ -96,10 +101,10 @@ if __name__ == '__main__':
     # print(TopNRecommender().calAccuracy(1, 1, 2, 5))
     # print(TopNRecommender().calAccuracy_kps(1, 4, 1, 5))    # video, time, user, top / kps, cf, best, rand
 
-    video1 = [2]
-    video2 = [3, 4, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19]
-    video3 = [1, 5, 7, 12, 14, 20]
-    video4 = [6]
+    video1 = [2]  # 11 sec
+    video2 = [3, 4, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19]  # 15 sec
+    video3 = [1, 5, 7, 12, 14, 20]  # 30 sec
+    video4 = [6]  # 50 sec
 
     # video_ = 1
     # user = 1
